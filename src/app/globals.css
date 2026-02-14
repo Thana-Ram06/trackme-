@@ -359,6 +359,31 @@ button {
   transform: none;
 }
 
+/* Login page */
+
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.login-container h1 {
+  font-family: var(
+    --font-instrument,
+    "Instrument Serif",
+    Georgia,
+    "Times New Roman",
+    serif
+  );
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-container .btn {
+  cursor: pointer;
+}
+
 /* Hero / landing */
 
 .page {
