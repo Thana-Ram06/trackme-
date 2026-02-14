@@ -8,6 +8,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleGoogleLogin = async () => {
+    if (!auth) {
+      alert("Sign-in is not configured. Add Firebase env vars in Vercel.");
+      return;
+    }
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
