@@ -32,6 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, (next) => {
       setUser(next);
       setLoading(false);
@@ -41,11 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
+    if (!auth) return;
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
   }, []);
 
   const logout = useCallback(async () => {
+    if (!auth) return;
     await signOut(auth);
   }, []);
 

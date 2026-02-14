@@ -193,15 +193,22 @@ button {
   gap: 0.6rem;
 }
 
-.navbar-mark {
-  width: 20px;
-  height: 20px;
-  border-radius: 7px;
-  background: radial-gradient(circle at 20% 20%, #f97316, #a855f7 40%, #22c55e);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
-.navbar-brand {
+.logo-img {
+  margin-right: 10px;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.brand-name {
   font-family: var(
     --font-instrument,
     "Instrument Serif",
@@ -245,7 +252,8 @@ button {
 
 @media (min-width: 1280px) {
   .navbar {
-    padding-inline: 7.5rem;
+    padding-left: 120px;
+    padding-right: 120px;
   }
 }
 
@@ -270,19 +278,28 @@ button {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  color: #050509;
+  background: #111111;
+  color: #ffffff;
   border-color: transparent;
   box-shadow: none;
+  font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
+  background: #000000;
   transform: translateY(-1px);
 }
 
 [data-theme="light"] .btn-primary {
-  color: #110f1a;
-  box-shadow: 0 14px 40px rgba(62, 33, 215, 0.35);
+  background: #111111;
+  color: #ffffff;
+}
+
+[data-theme="light"] .btn-primary:hover {
+  background: #000000;
 }
 
 .btn-ghost {
@@ -324,6 +341,10 @@ button {
 .btn-lg {
   padding: 0.85rem 1.6rem;
   font-size: 0.95rem;
+}
+
+.btn-primary.btn-lg {
+  padding: 14px 28px;
 }
 
 .btn-pill {

@@ -1,5 +1,8 @@
+import type { FirebaseApp } from "firebase/app";
 import { getApp, getApps, initializeApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
 import { getAuth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -11,25 +14,35 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-if (
-  !firebaseConfig.apiKey ||
-  !firebaseConfig.authDomain ||
-  !firebaseConfig.projectId ||
-  !firebaseConfig.appId
-) {
-  // Fail fast in development if required env vars are missing.
-  if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "[Track.me] Missing Firebase configuration. Check your NEXT_PUBLIC_FIREBASE_* env vars.",
-    );
+const hasValidConfig =
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.appId;
+
+let app: FirebaseApp | null = null;
+let authInstance: Auth | null = null;
+let dbInstance: Firestore | null = null;
+
+if (hasValidConfig) {
+  try {
+    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    authInstance = getAuth(app);
+    dbInstance = getFirestore(app);
+  } catch {
+    app = null;
+    authInstance = null;
+    dbInstance = null;
   }
+} else if (process.env.NODE_ENV !== "production") {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[Track.me] Missing Firebase configuration. Add NEXT_PUBLIC_FIREBASE_* in Vercel env vars.",
+  );
 }
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = authInstance;
+export const db = dbInstance;
 
 export default app;
 

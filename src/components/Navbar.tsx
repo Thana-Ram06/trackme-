@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -11,9 +12,15 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <span className="navbar-mark" />
-        <Link href="/" className="navbar-brand">
-          Track.me
+        <Link href="/" className="logo-wrapper">
+          <Image
+            src="/logo.png"
+            alt="Track logo"
+            width={32}
+            height={32}
+            className="logo-img"
+          />
+          <span className="brand-name">Track.me</span>
         </Link>
       </div>
 

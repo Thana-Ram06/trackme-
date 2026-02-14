@@ -33,6 +33,11 @@ export default function AddSubscriptionForm({
       return;
     }
 
+    if (!db) {
+      setError("Service unavailable. Check your configuration.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 

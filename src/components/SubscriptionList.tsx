@@ -35,6 +35,7 @@ export default function SubscriptionList({
   subscriptions,
 }: SubscriptionListProps) {
   const handleDelete = async (id: string) => {
+    if (!db) return;
     const ref = doc(db, "users", userId, "subscriptions", id);
     await deleteDoc(ref);
   };
