@@ -7,6 +7,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import {
   ReactNode,
   createContext,
@@ -16,7 +17,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 
 type AuthContextValue = {
   user: User | null;
@@ -26,6 +27,18 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+async function ensureUserInFirestore(user: User) {
+  if (!db) return;
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+  if (snap.exists()) return;
+  await setDoc(userRef, {
+    name: user.displayName ?? "",
+    email: user.email ?? "",
+    createdAt: serverTimestamp(),
+  });
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -39,6 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsub = onAuthStateChanged(auth, (next) => {
       setUser(next);
       setLoading(false);
+      if (next) {
+        ensureUserInFirestore(next).catch(() => {});
+      }
     });
 
     return () => unsub();
@@ -65,7 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [user, loading, loginWithGoogle, logout],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthContextValue {
@@ -75,4 +93,3 @@ export function useAuth(): AuthContextValue {
   }
   return ctx;
 }
-

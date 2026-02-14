@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@/components/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import LoginButton from "@/components/LoginButton";
 
 export default function Navbar() {
   const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <header className="navbar">
@@ -30,11 +32,21 @@ export default function Navbar() {
 
       <div className="navbar-right">
         <ThemeToggle />
-        <LoginButton variant="ghost" />
-        {user && (
-          <Link href="/dashboard" className="btn btn-sm btn-ghost">
-            Dashboard
-          </Link>
+        {user ? (
+          <>
+            <Link href="/dashboard" className="btn btn-sm btn-ghost">
+              Dashboard
+            </Link>
+            <LoginButton variant="ghost" />
+          </>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost btn-pill"
+            onClick={() => router.push("/login")}
+          >
+            Sign in
+          </button>
         )}
       </div>
     </header>

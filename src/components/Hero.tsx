@@ -1,21 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Hero() {
-  const { user, loginWithGoogle, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
-  const handleGetStarted = async () => {
+  const handleGetStarted = () => {
     if (loading) return;
     if (user) {
       router.push("/dashboard");
-      return;
+    } else {
+      router.push("/login");
     }
-
-    await loginWithGoogle();
-    router.push("/dashboard");
   };
 
   const handleLearnMore = () => {

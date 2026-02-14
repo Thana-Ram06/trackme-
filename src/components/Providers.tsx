@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider } from "@/components/AuthProvider";
+import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function Providers({
