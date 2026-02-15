@@ -8,6 +8,7 @@ import TransactionModal from "@/components/TransactionModal";
 import type { TransactionType } from "@/types/transaction";
 
 type TabId = "this-month" | "last-month" | "this-year";
+type ListFilterId = TabId | "all-time";
 
 function getTransactionDate(t: Transaction): Date {
   const d = t.date;
@@ -24,6 +25,30 @@ function isInMonth(date: Date, year: number, month: number): boolean {
 
 function isInYear(date: Date, year: number): boolean {
   return date.getFullYear() === year;
+}
+
+function filterTransactionsByPeriod(
+  transactions: Transaction[],
+  filter: ListFilterId
+): Transaction[] {
+  if (filter === "all-time") return [...transactions];
+  const now = new Date();
+  if (filter === "this-month") {
+    return transactions.filter((t) =>
+      isInMonth(getTransactionDate(t), now.getFullYear(), now.getMonth())
+    );
+  }
+  if (filter === "last-month") {
+    const lastMonth = now.getMonth() - 1;
+    const year = lastMonth < 0 ? now.getFullYear() - 1 : now.getFullYear();
+    const month = lastMonth < 0 ? lastMonth + 12 : lastMonth;
+    return transactions.filter((t) =>
+      isInMonth(getTransactionDate(t), year, month)
+    );
+  }
+  return transactions.filter((t) =>
+    isInYear(getTransactionDate(t), now.getFullYear())
+  );
 }
 
 function getTotals(
@@ -168,15 +193,34 @@ export default function MoneyOverview({
     };
   }, [userId]);
 
-  const transactions = [...incomes, ...expenses];
+  const transactions = [...incomes, ...expenses].sort((a, b) => {
+    const da = getTransactionDate(a).getTime();
+    const db_ = getTransactionDate(b).getTime();
+    return db_ - da;
+  });
 
   const totals = getTotals(transactions, tab);
+
+  const [transactionsModalOpen, setTransactionsModalOpen] = useState(false);
+  const [listFilter, setListFilter] = useState<ListFilterId>("all-time");
+  const filteredList = filterTransactionsByPeriod(transactions, listFilter);
 
   const formatMoney = (n: number) =>
     n.toLocaleString(undefined, {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
+
+  const formatListDate = (dateStr: string) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   return (
     <section className="dashboard-panel dashboard-panel-money">
@@ -199,6 +243,13 @@ export default function MoneyOverview({
           onClick={() => setModalType("expense")}
         >
           + Add Expense
+        </button>
+        <button
+          type="button"
+          className="btn btn-view-transactions"
+          onClick={() => setTransactionsModalOpen(true)}
+        >
+          View All Transactions
         </button>
       </div>
 
@@ -264,6 +315,67 @@ export default function MoneyOverview({
           onSuccess={() => {}}
           onError={onError}
         />
+      )}
+
+      {transactionsModalOpen && (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="transactions-modal-title"
+          onClick={(e) => e.target === e.currentTarget && setTransactionsModalOpen(false)}
+        >
+          <div className="modal-content modal-content--transactions">
+            <div className="modal-header">
+              <h2 id="transactions-modal-title" className="modal-title">
+                All Transactions
+              </h2>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setTransactionsModalOpen(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="transactions-list-filters">
+              {(["this-month", "last-month", "this-year", "all-time"] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={"money-tab" + (listFilter === f ? " money-tab--active" : "")}
+                  onClick={() => setListFilter(f)}
+                >
+                  {f === "all-time" ? "All Time" : f === "this-month" ? "This Month" : f === "last-month" ? "Last Month" : "This Year"}
+                </button>
+              ))}
+            </div>
+            <div className="transactions-list-wrap">
+              {loading ? (
+                <div className="transactions-list-loading">Loading…</div>
+              ) : filteredList.length === 0 ? (
+                <p className="transactions-list-empty">No transactions yet.</p>
+              ) : (
+                <ul className="transactions-list">
+                  {filteredList.map((t) => (
+                    <li key={t.id} className="transactions-list-item">
+                      <span className={"transactions-list-type transactions-list-type--" + t.type}>
+                        [{t.type === "income" ? "Income" : "Expense"}]
+                      </span>
+                      <span className="transactions-list-title">{t.title}</span>
+                      <span className={"transactions-list-amount transactions-list-amount--" + t.type}>
+                        {formatMoney(t.amount)}
+                      </span>
+                      <span className="transactions-list-category">{t.category}</span>
+                      <span className="transactions-list-date">{formatListDate(t.date)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

@@ -1058,6 +1058,22 @@ button {
   color: var(--danger);
 }
 
+.btn-view-transactions {
+  font-size: 0.8rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-view-transactions:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+
 .money-tabs {
   display: flex;
   gap: 0.25rem;
@@ -1136,6 +1152,125 @@ button {
 .money-value--balance {
   color: var(--text);
   font-weight: 700;
+}
+
+/* Transactions list modal */
+
+.modal-content--transactions {
+  max-width: 640px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content--transactions .modal-header {
+  flex-shrink: 0;
+}
+
+.transactions-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.transactions-list-wrap {
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+}
+
+.transactions-list-loading,
+.transactions-list-empty {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.transactions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.transactions-list-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+
+.transactions-list-item:last-child {
+  border-bottom: none;
+}
+
+.transactions-list-type {
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.transactions-list-type--income {
+  color: var(--success);
+}
+
+.transactions-list-type--expense {
+  color: var(--danger);
+}
+
+.transactions-list-title {
+  color: var(--text);
+  min-width: 0;
+}
+
+.transactions-list-amount {
+  font-weight: 600;
+}
+
+.transactions-list-amount--income {
+  color: var(--success);
+}
+
+.transactions-list-amount--expense {
+  color: var(--danger);
+}
+
+.transactions-list-category {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.transactions-list-date {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 560px) {
+  .transactions-list-item {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .transactions-list-type {
+    order: 0;
+  }
+
+  .transactions-list-title {
+    order: 1;
+  }
+
+  .transactions-list-amount {
+    order: 2;
+  }
+
+  .transactions-list-category,
+  .transactions-list-date {
+    order: 3;
+  }
 }
 
 .dashboard-empty-note {
