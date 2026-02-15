@@ -2,6 +2,7 @@
 
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { getCurrencySymbol } from "@/lib/constants";
 import type { Subscription } from "@/types/subscription";
 
 type SubscriptionListProps = {
@@ -9,14 +10,10 @@ type SubscriptionListProps = {
   subscriptions: Subscription[];
 };
 
-function formatPrice(price: number): string {
-  if (Number.isNaN(price)) return "$0";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(price);
+function formatPrice(price: number, currencyCode?: string): string {
+  if (Number.isNaN(price)) return getCurrencySymbol(currencyCode ?? "USD") + "0";
+  const symbol = getCurrencySymbol(currencyCode ?? "USD");
+  return symbol + price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 function formatDate(dateString: string): string {
@@ -50,7 +47,7 @@ export default function SubscriptionList({
             <div className="subscription-main">
               <div className="subscription-name">{sub.name}</div>
               <div className="subscription-meta">
-                {formatPrice(sub.price)} · Renews {formatDate(sub.renewalDate)}
+                {formatPrice(sub.price, sub.currency)} · Renews {formatDate(sub.renewalDate)}
               </div>
             </div>
             <button

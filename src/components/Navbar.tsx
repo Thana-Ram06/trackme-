@@ -18,16 +18,12 @@ export default function Navbar() {
           <Image
             src="/logo.png"
             alt="Track logo"
-            width={32}
-            height={32}
+            width={36}
+            height={36}
             className="logo-img"
           />
           <span className="brand-name">Track.me</span>
         </Link>
-      </div>
-
-      <div className="navbar-center">
-        <span>Calm subscription tracking for busy people.</span>
       </div>
 
       <div className="navbar-right">

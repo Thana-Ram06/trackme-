@@ -1,11 +1,52 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { getCurrencySymbol } from "@/lib/constants";
+import type { Subscription } from "@/types/subscription";
+
+function isInCurrentMonth(dateStr: string): boolean {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+}
 
 export default function Hero() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [monthRenewals, setMonthRenewals] = useState<Subscription[]>([]);
+  const [renewalsLoading, setRenewalsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user || !db) {
+      setMonthRenewals([]);
+      setRenewalsLoading(false);
+      return;
+    }
+    const subsRef = collection(db, "users", user.uid, "subscriptions");
+    const q = query(subsRef, orderBy("renewalDate", "asc"));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: (data.name as string) ?? "",
+          price: Number(data.price ?? 0),
+          currency: (data.currency as string) ?? "USD",
+          renewalDate: (data.renewalDate as string) ?? "",
+          renewalInterval: (data.renewalInterval as string) ?? undefined,
+          createdAt: data.createdAt?.toString?.(),
+        } as Subscription;
+      });
+      setMonthRenewals(list.filter((s) => isInCurrentMonth(s.renewalDate)));
+      setRenewalsLoading(false);
+    });
+    return () => unsub();
+  }, [user]);
 
   const handleGetStarted = () => {
     if (loading) return;
@@ -22,6 +63,15 @@ export default function Hero() {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const totalByCurrency: Record<string, number> = {};
+  monthRenewals.forEach((s) => {
+    const code = s.currency ?? "USD";
+    totalByCurrency[code] = (totalByCurrency[code] ?? 0) + s.price;
+  });
+  const totalParts = Object.entries(totalByCurrency).map(
+    ([code, sum]) => getCurrencySymbol(code) + sum.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+  );
 
   return (
     <section className="hero">
@@ -65,8 +115,18 @@ export default function Hero() {
 
           <div className="hero-renewal-card" aria-hidden="true">
             <div className="hero-renewal-title">This month&apos;s renewals</div>
-            <div className="hero-renewal-amount">$0</div>
-            <div className="hero-renewal-caption">until you add</div>
+            {renewalsLoading ? (
+              <div className="hero-renewal-amount">…</div>
+            ) : monthRenewals.length === 0 ? (
+              <>
+                <div className="hero-renewal-amount hero-renewal-amount--muted">No renewals this month</div>
+              </>
+            ) : (
+              <>
+                <div className="hero-renewal-amount">{totalParts.join(" · ")}</div>
+                <div className="hero-renewal-caption">{monthRenewals.length} {monthRenewals.length === 1 ? "renewal" : "renewals"}</div>
+              </>
+            )}
           </div>
 
           <div className="hero-meta">

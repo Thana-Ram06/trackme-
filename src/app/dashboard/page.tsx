@@ -49,7 +49,9 @@ export default function DashboardPage() {
               id: d.id,
               name: (data.name as string) ?? "",
               price: Number(data.price ?? 0),
+              currency: (data.currency as string) ?? "USD",
               renewalDate: (data.renewalDate as string) ?? "",
+              renewalInterval: (data.renewalInterval as string) ?? undefined,
               createdAt: data.createdAt?.toString?.(),
             } satisfies Subscription;
           }
