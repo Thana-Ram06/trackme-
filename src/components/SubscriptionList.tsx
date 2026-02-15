@@ -1,8 +1,8 @@
 "use client";
 
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { getCurrencySymbol } from "@/lib/constants";
+import { getCurrencySymbol, addMonthsToDate, getMonthsFromInterval } from "@/lib/constants";
 import type { Subscription } from "@/types/subscription";
 
 type SubscriptionListProps = {
@@ -27,14 +27,43 @@ function formatDate(dateString: string): string {
   });
 }
 
+function formatDDMMYYYY(dateString: string): string {
+  if (!dateString) return "—";
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return dateString;
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function getDueDate(sub: Subscription): string {
+  return sub.nextDueDate || sub.renewalDate || "";
+}
+
 export default function SubscriptionList({
   userId,
   subscriptions,
 }: SubscriptionListProps) {
+  const today = new Date().toISOString().slice(0, 10);
+
   const handleDelete = async (id: string) => {
     if (!db) return;
     const ref = doc(db, "users", userId, "subscriptions", id);
     await deleteDoc(ref);
+  };
+
+  const handleMarkPaid = async (sub: Subscription) => {
+    if (!db) return;
+    const ref = doc(db, "users", userId, "subscriptions", sub.id);
+    const months = getMonthsFromInterval(sub.renewalInterval);
+    const nextDue = addMonthsToDate(today, months);
+    await updateDoc(ref, {
+      isPaidThisCycle: true,
+      lastPaidDate: today,
+      nextDueDate: nextDue,
+      renewalDate: nextDue,
+    });
   };
 
   if (!subscriptions.length) return null;
@@ -42,23 +71,64 @@ export default function SubscriptionList({
   return (
     <div className="subscription-list">
       <div className="subscription-grid">
-        {subscriptions.map((sub) => (
-          <article key={sub.id} className="subscription-card">
-            <div className="subscription-main">
-              <div className="subscription-name">{sub.name}</div>
-              <div className="subscription-meta">
-                {formatPrice(sub.price, sub.currency)} · Renews {formatDate(sub.renewalDate)}
+        {subscriptions.map((sub) => {
+          const dueDate = getDueDate(sub);
+          const isOverdue = dueDate && today > dueDate && !sub.isPaidThisCycle;
+          const isExpiringSoon = dueDate && today >= dueDate ? false : dueDate && (() => {
+            const d = new Date(dueDate);
+            d.setDate(d.getDate() - 5);
+            return today >= d.toISOString().slice(0, 10);
+          })();
+
+          return (
+            <article key={sub.id} className="subscription-card">
+              <div className="subscription-main">
+                <div className="subscription-row">
+                  <span className="subscription-name">{sub.name}</span>
+                  {sub.isPaidThisCycle && (
+                    <span className="subscription-badge subscription-badge--paid">Paid</span>
+                  )}
+                  {isOverdue && (
+                    <span className="subscription-badge subscription-badge--due">
+                      DUE since {formatDDMMYYYY(dueDate)}
+                    </span>
+                  )}
+                </div>
+                <div className="subscription-meta">
+                  {formatPrice(sub.price, sub.currency)} · Next due {formatDate(dueDate)}
+                </div>
+                {isExpiringSoon && !sub.isPaidThisCycle && (
+                  <div className="subscription-expiring">
+                    Expiring on {formatDDMMYYYY(dueDate)} · Next due date: {formatDDMMYYYY(dueDate)}
+                  </div>
+                )}
+                {isOverdue && (
+                  <div className="subscription-expiring subscription-expiring--overdue">
+                    Next due date: {formatDDMMYYYY(dueDate)}
+                  </div>
+                )}
               </div>
-            </div>
-            <button
-              type="button"
-              className="btn btn-delete"
-              onClick={() => handleDelete(sub.id)}
-            >
-              Delete
-            </button>
-          </article>
-        ))}
+              <div className="subscription-actions">
+                {!sub.isPaidThisCycle && (
+                  <button
+                    type="button"
+                    className="btn btn-mark-paid"
+                    onClick={() => handleMarkPaid(sub)}
+                  >
+                    Mark as Paid
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-delete"
+                  onClick={() => handleDelete(sub.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

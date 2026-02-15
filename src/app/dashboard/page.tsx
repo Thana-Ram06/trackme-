@@ -2,14 +2,17 @@
 
 import {
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
+  updateDoc,
   QueryDocumentSnapshot,
   DocumentData,
 } from "firebase/firestore";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import AddSubscriptionForm from "@/components/AddSubscriptionForm";
@@ -23,6 +26,7 @@ export default function DashboardPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const resetIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (loading) return;
@@ -52,6 +56,9 @@ export default function DashboardPage() {
               currency: (data.currency as string) ?? "USD",
               renewalDate: (data.renewalDate as string) ?? "",
               renewalInterval: (data.renewalInterval as string) ?? undefined,
+              nextDueDate: (data.nextDueDate as string) ?? undefined,
+              isPaidThisCycle: data.isPaidThisCycle === true,
+              lastPaidDate: (data.lastPaidDate as string) ?? undefined,
               createdAt: data.createdAt?.toString?.(),
             } satisfies Subscription;
           }
@@ -65,6 +72,20 @@ export default function DashboardPage() {
     );
     return () => unsub();
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !db || subscriptions.length === 0) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const firestore = db;
+    subscriptions.forEach(async (sub) => {
+      const due = sub.nextDueDate || sub.renewalDate;
+      if (due && due < today && sub.isPaidThisCycle && !resetIdsRef.current.has(sub.id)) {
+        resetIdsRef.current.add(sub.id);
+        const docRef = doc(firestore, "users", user.uid, "subscriptions", sub.id);
+        await updateDoc(docRef, { isPaidThisCycle: false });
+      }
+    });
+  }, [user, subscriptions, db]);
 
   const handleLogout = async () => {
     await logout();
@@ -99,6 +120,9 @@ export default function DashboardPage() {
   return (
     <div className="dashboard">
       <div className="dashboard-inner">
+        <Link href="/" className="dashboard-back">
+          ← Back to Home
+        </Link>
         <header className="dashboard-header">
           <h1 className="dashboard-title">Dashboard</h1>
           <p className="dashboard-subtitle">

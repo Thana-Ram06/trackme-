@@ -57,6 +57,8 @@ export default function AddSubscriptionForm({
         currency: currency || "USD",
         renewalInterval: renewalInterval || null,
         renewalDate,
+        nextDueDate: renewalDate,
+        isPaidThisCycle: false,
         createdAt: serverTimestamp(),
       });
       setName("");

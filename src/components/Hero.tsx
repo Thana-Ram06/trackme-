@@ -39,10 +39,14 @@ export default function Hero() {
           currency: (data.currency as string) ?? "USD",
           renewalDate: (data.renewalDate as string) ?? "",
           renewalInterval: (data.renewalInterval as string) ?? undefined,
+          nextDueDate: (data.nextDueDate as string) ?? undefined,
+          isPaidThisCycle: data.isPaidThisCycle === true,
+          lastPaidDate: (data.lastPaidDate as string) ?? undefined,
           createdAt: data.createdAt?.toString?.(),
         } as Subscription;
       });
-      setMonthRenewals(list.filter((s) => isInCurrentMonth(s.renewalDate)));
+      const dueDate = (s: Subscription) => s.nextDueDate || s.renewalDate || "";
+      setMonthRenewals(list.filter((s) => isInCurrentMonth(dueDate(s))));
       setRenewalsLoading(false);
     });
     return () => unsub();

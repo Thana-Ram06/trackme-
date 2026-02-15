@@ -20,7 +20,7 @@ export default function Navbar() {
             alt="Track logo"
             width={36}
             height={36}
-            className="logo-img"
+            className="logo-img rounded-full object-cover mr-2"
           />
           <span className="brand-name">Track.me</span>
         </Link>

@@ -38,3 +38,10 @@ export function addMonthsToDate(dateStr: string, months: number): string {
   d.setMonth(d.getMonth() + months);
   return d.toISOString().slice(0, 10);
 }
+
+/** Get number of months for a renewal interval value. */
+export function getMonthsFromInterval(interval: string | undefined): number {
+  if (!interval) return 12;
+  const cycle = RENEWAL_CYCLES.find((c) => c.value === interval);
+  return cycle?.months ?? 12;
+}

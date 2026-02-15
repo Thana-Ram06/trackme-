@@ -1,5 +1,13 @@
 import Hero from "@/components/Hero";
 
+function XIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export default function Home() {
   return (
     <div className="page">
@@ -38,46 +46,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="why" className="section">
-        <div className="section-header">
-          <h2 className="section-title">Why another tracker?</h2>
-          <p className="section-description">
-            Because most &ldquo;subscription managers&rdquo; feel like dashboards
-            for teams. Track.me is for one person, on a quiet evening, deciding
-            what still matters.
-          </p>
-        </div>
-        <div className="why-grid">
-          <div className="why-panel">
-            <h3 className="feature-title">Designed for calm</h3>
-            <ul className="why-list">
-              <li>Dark by default, gentle light mode when you want it.</li>
-              <li>Large type and generous spacing for long days.</li>
-              <li>No clutter, badges, or growth hacks.</li>
-            </ul>
-          </div>
-          <div className="why-panel">
-            <h3 className="feature-title">Own your numbers</h3>
-            <p className="why-note">
-              Track.me uses Firebase Auth and Firestore directly from your browser.
-              There&apos;s no custom backend; you can inspect every document
-              yourself. If you ever outgrow it, your data is already portable.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <footer className="site-footer">
         <span>Track.me · A tiny tool for knowing what&apos;s next.</span>
         <div className="site-footer-links">
           <a href="#features">Features</a>
-          <a href="#why">Why</a>
+          <span className="site-footer-sep">|</span>
           <a
-            href="https://vercel.com"
+            href="https://x.com/anoinv"
             target="_blank"
             rel="noreferrer noopener"
+            className="site-footer-x"
           >
-            Deploy on Vercel
+            Made by me
+            <span className="site-footer-x-icon" aria-hidden="true">
+              <XIcon />
+            </span>
           </a>
         </div>
       </footer>
