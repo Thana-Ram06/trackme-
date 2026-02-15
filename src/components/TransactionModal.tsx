@@ -64,24 +64,32 @@ export default function TransactionModal({
 
     setSubmitting(true);
     try {
-      const ref = collection(db, "users", userId, "transactions");
+      const collectionName = type === "income" ? "incomes" : "expenses";
+      const ref = collection(db, "users", userId, collectionName);
       const dateAtMidnight = new Date(date + "T00:00:00");
-      await addDoc(ref, {
-        type,
+      const docRef = await addDoc(ref, {
         title: title.trim(),
         amount: num,
         category,
         date: Timestamp.fromDate(dateAtMidnight),
         createdAt: serverTimestamp(),
       });
+      if (!docRef?.id) {
+        throw new Error("Write did not return document id");
+      }
       setTitle("");
       setAmount("");
       setCategory(categories[0]);
       setDate(new Date().toISOString().slice(0, 10));
       onSuccess();
       onClose();
-    } catch {
-      onError("Could not save. Please try again.");
+    } catch (err) {
+      console.error("TransactionModal save error:", err);
+      const msg =
+        err instanceof Error
+          ? (err.message || "Could not save. Please try again.")
+          : "Could not save. Please try again.";
+      onError(msg.length > 80 ? "Could not save. Check console or try again." : msg);
     } finally {
       setSubmitting(false);
     }

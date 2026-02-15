@@ -55,14 +55,15 @@ export default function SubscriptionList({
 
   const handleMarkPaid = async (sub: Subscription) => {
     if (!db) return;
-    const ref = doc(db, "users", userId, "subscriptions", sub.id);
+    const docRef = doc(db, "users", userId, "subscriptions", sub.id);
     const months = getMonthsFromInterval(sub.renewalInterval);
-    const nextDue = addMonthsToDate(today, months);
-    await updateDoc(ref, {
+    const nextRenewalDate = addMonthsToDate(today, months);
+    await updateDoc(docRef, {
       isPaidThisCycle: true,
       lastPaidDate: today,
-      nextDueDate: nextDue,
-      renewalDate: nextDue,
+      nextDueDate: nextRenewalDate,
+      renewalDate: nextRenewalDate,
+      status: "paid",
     });
   };
 
@@ -74,10 +75,12 @@ export default function SubscriptionList({
         {subscriptions.map((sub) => {
           const dueDate = getDueDate(sub);
           const isOverdue = dueDate && today > dueDate && !sub.isPaidThisCycle;
-          const isExpiringSoon = dueDate && today >= dueDate ? false : dueDate && (() => {
-            const d = new Date(dueDate);
-            d.setDate(d.getDate() - 5);
-            return today >= d.toISOString().slice(0, 10);
+          const isDueSoon = (() => {
+            if (!dueDate || isOverdue || sub.isPaidThisCycle) return false;
+            const due = new Date(dueDate);
+            const todayDate = new Date(today);
+            const diffDays = Math.ceil((due.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 && diffDays <= 5;
           })();
 
           return (
@@ -88,20 +91,18 @@ export default function SubscriptionList({
                   {sub.isPaidThisCycle && (
                     <span className="subscription-badge subscription-badge--paid">Paid</span>
                   )}
+                  {isDueSoon && (
+                    <span className="subscription-badge subscription-badge--soon">Due soon</span>
+                  )}
                   {isOverdue && (
                     <span className="subscription-badge subscription-badge--due">
-                      DUE since {formatDDMMYYYY(dueDate)}
+                      Overdue since {formatDDMMYYYY(dueDate)}
                     </span>
                   )}
                 </div>
                 <div className="subscription-meta">
                   {formatPrice(sub.price, sub.currency)} · Next due {formatDate(dueDate)}
                 </div>
-                {isExpiringSoon && !sub.isPaidThisCycle && (
-                  <div className="subscription-expiring">
-                    Expiring on {formatDDMMYYYY(dueDate)} · Next due date: {formatDDMMYYYY(dueDate)}
-                  </div>
-                )}
                 {isOverdue && (
                   <div className="subscription-expiring subscription-expiring--overdue">
                     Next due date: {formatDDMMYYYY(dueDate)}

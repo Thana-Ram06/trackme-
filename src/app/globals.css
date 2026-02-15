@@ -547,6 +547,10 @@ button {
   color: var(--text-soft);
 }
 
+.hero-renewal-caption--overdue {
+  color: var(--danger);
+}
+
 @media (min-width: 960px) {
   .hero {
     padding-top: 2rem;
@@ -1336,6 +1340,11 @@ select:focus {
 .subscription-badge--paid {
   background: var(--success-soft);
   color: var(--success);
+}
+
+.subscription-badge--soon {
+  background: rgba(234, 179, 8, 0.2);
+  color: #ca8a04;
 }
 
 .subscription-badge--due {

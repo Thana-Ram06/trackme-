@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Transaction } from "@/types/transaction";
@@ -76,11 +76,21 @@ type MoneyOverviewProps = {
   onError: (message: string) => void;
 };
 
+const parseTransactionDate = (dateVal: unknown): string => {
+  if (!dateVal) return "";
+  if (typeof (dateVal as { toDate?: () => Date }).toDate === "function") {
+    return (dateVal as { toDate: () => Date }).toDate().toISOString().slice(0, 10);
+  }
+  if (typeof dateVal === "string") return dateVal;
+  return "";
+};
+
 export default function MoneyOverview({
   userId,
   onError,
 }: MoneyOverviewProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [incomes, setIncomes] = useState<Transaction[]>([]);
+  const [expenses, setExpenses] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabId>("this-month");
   const [modalType, setModalType] = useState<TransactionType | null>(null);
@@ -90,37 +100,74 @@ export default function MoneyOverview({
       setLoading(false);
       return;
     }
-    const ref = collection(db, "users", userId, "transactions");
-    const q = query(ref, orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(
-      q,
+    const incomesRef = collection(db, "users", userId, "incomes");
+    const expensesRef = collection(db, "users", userId, "expenses");
+    const qIncomes = query(incomesRef, orderBy("createdAt", "desc"));
+    const qExpenses = query(expensesRef, orderBy("createdAt", "desc"));
+
+    const loadedRef = useRef({ incomes: false, expenses: false });
+    const checkDone = (key: "incomes" | "expenses") => {
+      loadedRef.current[key] = true;
+      if (loadedRef.current.incomes && loadedRef.current.expenses) {
+        setLoading(false);
+      }
+    };
+
+    const unsubIncomes = onSnapshot(
+      qIncomes,
       (snapshot) => {
-        const list = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          const dateVal = data.date;
-          let dateStr = "";
-          if (dateVal?.toDate) {
-            dateStr = dateVal.toDate().toISOString().slice(0, 10);
-          } else if (typeof dateVal === "string") {
-            dateStr = dateVal;
-          }
+        const list: Transaction[] = snapshot.docs.map((d) => {
+          const data = d.data();
           return {
-            id: doc.id,
-            type: (data.type as TransactionType) ?? "expense",
+            id: d.id,
+            type: "income" as const,
             title: (data.title as string) ?? "",
             amount: Number(data.amount ?? 0),
             category: (data.category as string) ?? "",
-            date: dateStr,
+            date: parseTransactionDate(data.date),
             createdAt: data.createdAt?.toString?.(),
-          } satisfies Transaction;
+          };
         });
-        setTransactions(list);
-        setLoading(false);
+        setIncomes(list);
+        checkDone("incomes");
       },
-      () => setLoading(false)
+      (err) => {
+        console.error("MoneyOverview incomes error:", err);
+        checkDone("incomes");
+      }
     );
-    return () => unsub();
+
+    const unsubExpenses = onSnapshot(
+      qExpenses,
+      (snapshot) => {
+        const list: Transaction[] = snapshot.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: "exp-" + d.id,
+            type: "expense" as const,
+            title: (data.title as string) ?? "",
+            amount: Number(data.amount ?? 0),
+            category: (data.category as string) ?? "",
+            date: parseTransactionDate(data.date),
+            createdAt: data.createdAt?.toString?.(),
+          };
+        });
+        setExpenses(list);
+        checkDone("expenses");
+      },
+      (err) => {
+        console.error("MoneyOverview expenses error:", err);
+        checkDone("expenses");
+      }
+    );
+
+    return () => {
+      unsubIncomes();
+      unsubExpenses();
+    };
   }, [userId]);
+
+  const transactions = [...incomes, ...expenses];
 
   const totals = getTotals(transactions, tab);
 
