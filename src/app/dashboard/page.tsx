@@ -18,8 +18,6 @@ import { useAuth } from "@/context/AuthContext";
 import AddSubscriptionForm from "@/components/AddSubscriptionForm";
 import SubscriptionList from "@/components/SubscriptionList";
 import EmptyState from "@/components/EmptyState";
-import MoneyOverview from "@/components/MoneyOverview";
-import DashboardErrorBoundary from "@/components/DashboardErrorBoundary";
 import type { Subscription } from "@/types/subscription";
 
 export default function DashboardPage() {
@@ -68,8 +66,7 @@ export default function DashboardPage() {
         setSubscriptions(list);
         setListLoading(false);
       },
-      (err) => {
-        console.error("Dashboard subscriptions error:", err);
+      () => {
         setListLoading(false);
       }
     );
@@ -121,10 +118,9 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <DashboardErrorBoundary>
-      <div className="dashboard">
-        <div className="dashboard-inner">
-          <Link href="/" className="dashboard-back">
+    <div className="dashboard">
+      <div className="dashboard-inner">
+        <Link href="/" className="dashboard-back">
           ← Back to Home
         </Link>
         <header className="dashboard-header">
@@ -167,10 +163,6 @@ export default function DashboardPage() {
             <SubscriptionList userId={user.uid} subscriptions={subscriptions} />
           )}
         </section>
-
-        <section className="dashboard-panel dashboard-panel-money-wrap">
-          <MoneyOverview userId={user.uid} onError={showToast} />
-        </section>
       </div>
 
       {toast && (
@@ -179,6 +171,5 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
-    </DashboardErrorBoundary>
   );
 }

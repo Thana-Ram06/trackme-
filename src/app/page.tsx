@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero";
+import MoneyOverviewSection from "@/components/MoneyOverviewSection";
 
 function XIcon() {
   return (
@@ -66,6 +67,8 @@ export default function Home() {
           </article>
         </div>
       </section>
+
+      <MoneyOverviewSection />
 
       <footer className="site-footer">
         <span>Track.me · A tiny tool for knowing what&apos;s next.</span>

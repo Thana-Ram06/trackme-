@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Transaction } from "@/types/transaction";
 import TransactionModal from "@/components/TransactionModal";
@@ -94,7 +94,6 @@ export default function MoneyOverview({
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabId>("this-month");
   const [modalType, setModalType] = useState<TransactionType | null>(null);
-
   const loadedRef = useRef({ incomes: false, expenses: false });
 
   useEffect(() => {
@@ -103,13 +102,20 @@ export default function MoneyOverview({
       return;
     }
     loadedRef.current = { incomes: false, expenses: false };
-    setLoading(true);
-
     const incomesRef = collection(db, "users", userId, "incomes");
     const expensesRef = collection(db, "users", userId, "expenses");
-    // No orderBy to avoid requiring a Firestore index; we sort in memory
+    const qIncomes = query(incomesRef, orderBy("createdAt", "desc"));
+    const qExpenses = query(expensesRef, orderBy("createdAt", "desc"));
+
+    const checkDone = (key: "incomes" | "expenses") => {
+      loadedRef.current[key] = true;
+      if (loadedRef.current.incomes && loadedRef.current.expenses) {
+        setLoading(false);
+      }
+    };
+
     const unsubIncomes = onSnapshot(
-      incomesRef,
+      qIncomes,
       (snapshot) => {
         const list: Transaction[] = snapshot.docs.map((d) => {
           const data = d.data();
@@ -124,22 +130,16 @@ export default function MoneyOverview({
           };
         });
         setIncomes(list);
-        loadedRef.current.incomes = true;
-        if (loadedRef.current.incomes && loadedRef.current.expenses) {
-          setLoading(false);
-        }
+        checkDone("incomes");
       },
       (err) => {
         console.error("MoneyOverview incomes error:", err);
-        loadedRef.current.incomes = true;
-        if (loadedRef.current.incomes && loadedRef.current.expenses) {
-          setLoading(false);
-        }
+        checkDone("incomes");
       }
     );
 
     const unsubExpenses = onSnapshot(
-      expensesRef,
+      qExpenses,
       (snapshot) => {
         const list: Transaction[] = snapshot.docs.map((d) => {
           const data = d.data();
@@ -154,17 +154,11 @@ export default function MoneyOverview({
           };
         });
         setExpenses(list);
-        loadedRef.current.expenses = true;
-        if (loadedRef.current.incomes && loadedRef.current.expenses) {
-          setLoading(false);
-        }
+        checkDone("expenses");
       },
       (err) => {
         console.error("MoneyOverview expenses error:", err);
-        loadedRef.current.expenses = true;
-        if (loadedRef.current.incomes && loadedRef.current.expenses) {
-          setLoading(false);
-        }
+        checkDone("expenses");
       }
     );
 

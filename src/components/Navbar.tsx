@@ -33,6 +33,9 @@ export default function Navbar() {
             <Link href="/dashboard" className="btn btn-sm btn-ghost">
               Dashboard
             </Link>
+            <Link href="/money" className="btn btn-sm btn-ghost">
+              Money
+            </Link>
             <LoginButton variant="ghost" />
           </>
         ) : (
