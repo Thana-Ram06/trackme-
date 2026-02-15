@@ -1,3 +1,5 @@
+"use client";
+
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Subscription } from "@/types/subscription";
@@ -7,23 +9,21 @@ type SubscriptionListProps = {
   subscriptions: Subscription[];
 };
 
-function formatAmount(amount: number): string {
-  if (Number.isNaN(amount)) return "$0";
+function formatPrice(price: number): string {
+  if (Number.isNaN(price)) return "$0";
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(price);
 }
 
 function formatDate(dateString: string): string {
   if (!dateString) return "—";
-  const parsed = new Date(dateString);
-  if (Number.isNaN(parsed.getTime())) {
-    return dateString;
-  }
-  return parsed.toLocaleDateString(undefined, {
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return dateString;
+  return d.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -40,49 +40,29 @@ export default function SubscriptionList({
     await deleteDoc(ref);
   };
 
-  if (!subscriptions.length) {
-    return null;
-  }
+  if (!subscriptions.length) return null;
 
   return (
-    <div>
-      <div className="subscription-list-header">
-        <span>All subscriptions</span>
-        <span className="subscription-count">
-          {subscriptions.length}{" "}
-          {subscriptions.length === 1 ? "item" : "items"}
-        </span>
-      </div>
+    <div className="subscription-list">
       <div className="subscription-grid">
         {subscriptions.map((sub) => (
           <article key={sub.id} className="subscription-card">
             <div className="subscription-main">
               <div className="subscription-name">{sub.name}</div>
               <div className="subscription-meta">
-                Next renewal · {formatDate(sub.nextRenewalDate)}
+                {formatPrice(sub.price)} · Renews {formatDate(sub.renewalDate)}
               </div>
             </div>
-            <div className="subscription-billing">
-              <div className="subscription-amount">
-                {formatAmount(sub.amount)}
-              </div>
-              <div className="subscription-frequency">
-                {sub.billingCycle === "monthly" ? "per month" : "per year"}
-              </div>
-            </div>
-            <div className="subscription-actions">
-              <button
-                type="button"
-                className="btn btn-sm btn-ghost-danger"
-                onClick={() => handleDelete(sub.id)}
-              >
-                Remove
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn btn-delete"
+              onClick={() => handleDelete(sub.id)}
+            >
+              Delete
+            </button>
           </article>
         ))}
       </div>
     </div>
   );
 }
-

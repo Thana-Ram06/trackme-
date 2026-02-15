@@ -16,16 +16,9 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push("/dashboard");
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Login error:", error);
-      const code = error && typeof error === "object" && "code" in error ? (error as { code?: string }).code : "";
-      if (code === "auth/unauthorized-domain") {
-        alert("This domain is not allowed. Add it in Firebase Console → Authentication → Settings → Authorized domains.");
-      } else if (code === "auth/popup-blocked") {
-        alert("Popup was blocked. Allow popups for this site and try again.");
-      } else {
-        alert(`Login failed${code ? ` (${code})` : ""}`);
-      }
+     alert("Login failed");
     }
   };
 

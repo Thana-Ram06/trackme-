@@ -3,157 +3,107 @@
 import { FormEvent, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { BillingCycle } from "@/types/subscription";
 
 type AddSubscriptionFormProps = {
   userId: string;
+  onError: (message: string) => void;
 };
 
 export default function AddSubscriptionForm({
   userId,
+  onError,
 }: AddSubscriptionFormProps) {
   const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
-  const [nextRenewalDate, setNextRenewalDate] = useState("");
+  const [price, setPrice] = useState("");
+  const [renewalDate, setRenewalDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    if (!name.trim() || !amount || !nextRenewalDate) {
-      setError("Please fill in every field.");
+    if (!name.trim() || !price || !renewalDate) {
+      onError("Please fill in every field.");
       return;
     }
 
-    const parsedAmount = Number(amount);
-    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-      setError("Amount should be a positive number.");
+    const parsedPrice = Number(price);
+    if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
+      onError("Price should be a positive number.");
       return;
     }
 
     if (!db) {
-      setError("Service unavailable. Check your configuration.");
+      onError("Service unavailable. Check your configuration.");
       return;
     }
 
     setSubmitting(true);
-    setError(null);
 
     try {
-      const subscriptionsRef = collection(
-        db,
-        "users",
-        userId,
-        "subscriptions",
-      );
-
+      const subscriptionsRef = collection(db, "users", userId, "subscriptions");
       await addDoc(subscriptionsRef, {
         name: name.trim(),
-        amount: parsedAmount,
-        billingCycle,
-        nextRenewalDate,
+        price: parsedPrice,
+        renewalDate,
         createdAt: serverTimestamp(),
       });
-
       setName("");
-      setAmount("");
-      setNextRenewalDate("");
-      setBillingCycle("monthly");
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      setError("Unable to save subscription. Please try again.");
+      setPrice("");
+      setRenewalDate("");
+    } catch {
+      onError("Could not save. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
+    <form className="form form-dashboard" onSubmit={handleSubmit}>
       <div className="field-group">
-        <label className="field-label" htmlFor="name">
-          Name
+        <label className="field-label" htmlFor="sub-name">
+          Subscription name
         </label>
         <input
-          id="name"
+          id="sub-name"
           type="text"
-          placeholder="Spotify, Figma, domain, ..."
+          placeholder="e.g. Netflix, Figma"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(e) => setName(e.target.value)}
           autoComplete="off"
         />
       </div>
-
-      <div className="field-row">
-        <div className="field-group">
-          <label className="field-label" htmlFor="amount">
-            Amount
-          </label>
-          <input
-            id="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="9.99"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-          />
-        </div>
-
-        <div className="field-group">
-          <label className="field-label" htmlFor="billingCycle">
-            Billing
-          </label>
-          <select
-            id="billingCycle"
-            value={billingCycle}
-            onChange={(event) =>
-              setBillingCycle(event.target.value as BillingCycle)
-            }
-          >
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </div>
-      </div>
-
       <div className="field-group">
-        <label className="field-label" htmlFor="nextRenewal">
-          Next renewal date
+        <label className="field-label" htmlFor="sub-price">
+          Price
         </label>
         <input
-          id="nextRenewal"
-          type="date"
-          value={nextRenewalDate}
-          onChange={(event) => setNextRenewalDate(event.target.value)}
+          id="sub-price"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="9.99"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
         />
-        <p className="field-help">
-          We&apos;ll sort your list by this date so the next charge is always at
-          the top.
-        </p>
       </div>
-
-      <div className="form-footer">
-        <div>
-          {error ? (
-            <p className="field-error">{error}</p>
-          ) : (
-            <p className="field-help">
-              You can always edit or delete items later.
-            </p>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="btn btn-primary btn-lg"
-          disabled={submitting}
-        >
-          {submitting ? "Saving..." : "Add subscription"}
-        </button>
+      <div className="field-group">
+        <label className="field-label" htmlFor="sub-renewal">
+          Renewal date
+        </label>
+        <input
+          id="sub-renewal"
+          type="date"
+          value={renewalDate}
+          onChange={(e) => setRenewalDate(e.target.value)}
+        />
       </div>
+      <button
+        type="submit"
+        className="btn btn-primary btn-add-sub"
+        disabled={submitting}
+      >
+        {submitting ? "Adding…" : "Add subscription"}
+      </button>
     </form>
   );
 }
-
