@@ -43,6 +43,27 @@ export default function Home() {
               thoughtful interface on top.
             </p>
           </article>
+          <article className="feature-card">
+            <h3 className="feature-title">Smart Payment Tracking</h3>
+            <p className="feature-body">
+              Mark subscriptions as paid, see what&apos;s due, and get notified 5 days
+              before renewal.
+            </p>
+          </article>
+          <article className="feature-card">
+            <h3 className="feature-title">Monthly Money Overview</h3>
+            <p className="feature-body">
+              Track your income and expenses each month and instantly see your net
+              balance.
+            </p>
+          </article>
+          <article className="feature-card">
+            <h3 className="feature-title">Yearly Insights</h3>
+            <p className="feature-body">
+              View last month&apos;s data or your full year summary to understand your
+              total earnings and spending.
+            </p>
+          </article>
         </div>
       </section>
 

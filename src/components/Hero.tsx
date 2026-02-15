@@ -91,13 +91,13 @@ export default function Hero() {
           </h1>
 
           <p className="hero-subtitle">
-            Track.me is a calm little place for your recurring costs. See what&apos;s
-            renewing next, and decide what still earns its keep.
+            Track.me helps you manage subscriptions, track monthly expenses, record
+            income, and understand your money flow — all in one calm, focused space.
           </p>
 
           <p className="hero-subsubtitle">
-            No dashboards full of fake charts. Just a focused list that stays out of
-            your way until you need it.
+            See what&apos;s renewing, what&apos;s paid, what&apos;s due soon, and how your
+            spending compares month to month.
           </p>
 
           <div className="hero-actions">

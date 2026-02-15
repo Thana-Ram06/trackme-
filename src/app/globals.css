@@ -454,19 +454,30 @@ button {
 
 .hero-subtitle {
   margin-top: 1.35rem;
+  font-family: var(--font-inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Helvetica Neue", Arial, sans-serif);
   font-size: 1.1rem;
-  max-width: 36rem;
+  line-height: 1.7;
+  letter-spacing: normal;
+  max-width: 620px;
   margin-left: auto;
   margin-right: auto;
+  text-align: center;
+  color: var(--text-muted);
 }
 
 .hero-subsubtitle {
-  margin-top: 0.65rem;
-  font-size: 0.98rem;
-  color: var(--text-soft);
-  max-width: 32rem;
+  margin-top: 0.75rem;
+  font-family: var(--font-inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Helvetica Neue", Arial, sans-serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  letter-spacing: normal;
+  max-width: 620px;
   margin-left: auto;
   margin-right: auto;
+  text-align: center;
+  color: var(--text-soft);
 }
 
 .hero-actions {
