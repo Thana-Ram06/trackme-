@@ -14,6 +14,8 @@ export default function Home() {
     <div className="page">
       <Hero />
 
+      <MoneyOverviewSection />
+
       <section id="features" className="section">
         <div className="section-header">
           <h2 className="section-title">A calm surface over your subscriptions</h2>
@@ -67,8 +69,6 @@ export default function Home() {
           </article>
         </div>
       </section>
-
-      <MoneyOverviewSection />
 
       <footer className="site-footer">
         <span>Track.me · A tiny tool for knowing what&apos;s next.</span>
