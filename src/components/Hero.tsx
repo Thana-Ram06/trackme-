@@ -90,10 +90,10 @@ export default function Hero() {
             Track subscriptions. Know what&apos;s coming.
           </h1>
 
-          <p className="hero-subtitle">
+          {/* <p className="hero-subtitle">
             Track.me helps you manage subscriptions, track monthly expenses, record
             income, and understand your money flow — all in one calm, focused space.
-          </p>
+          </p> */}
 
           <p className="hero-subsubtitle">
             See what&apos;s renewing, what&apos;s paid, what&apos;s due soon, and how your
