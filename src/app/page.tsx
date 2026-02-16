@@ -76,7 +76,7 @@ export default function Home() {
           <a href="#features">Features</a>
           <span className="site-footer-sep">|</span>
           <a
-            href="https://x.com/anoinv"
+            href="https://x.com/tr_dev06"
             target="_blank"
             rel="noreferrer noopener"
             className="site-footer-x"
