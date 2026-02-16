@@ -66,7 +66,7 @@ export default function Hero() {
   const handleGetStarted = () => {
     if (loading) return;
     if (user) {
-      router.push("/dashboard");
+      router.push("/subscriptions");
     } else {
       router.push("/login");
     }
@@ -146,7 +146,7 @@ export default function Hero() {
               className="btn btn-lg btn-primary"
               onClick={handleGetStarted}
             >
-              {user ? "Open dashboard" : "Get started"}
+              {user ? "Open Subscriptions" : "Get started"}
             </button>
             <button
               type="button"
