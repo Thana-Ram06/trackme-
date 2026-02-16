@@ -44,7 +44,7 @@ export default function Navbar() {
             className="btn btn-sm btn-ghost btn-pill"
             onClick={() => router.push("/login")}
           >
-            Sign in
+            {/* Sign in */}
           </button>
         )}
       </div>
