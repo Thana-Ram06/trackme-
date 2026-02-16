@@ -60,7 +60,7 @@ export default function Navbar() {
             <Link href="/money" className="btn btn-sm btn-ghost">
               Money
             </Link>
-            <LoginButton variant="ghost" />
+            
           </>
         
       </div> 
