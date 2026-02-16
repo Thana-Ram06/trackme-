@@ -25,7 +25,7 @@ export default function Navbar() {
           <span className="brand-name">Track.me</span>
         </Link>
       </div>
-
+{/* 
       <div className="navbar-right">
         <ThemeToggle />
         {user ? (
@@ -44,10 +44,29 @@ export default function Navbar() {
             className="btn btn-sm btn-ghost btn-pill"
             onClick={() => router.push("/login")}
           >
-            {/* Sign in */}
+            Sign in
           </button>
         )}
-      </div>
+      </div> */}
+
+
+<div className="navbar-right">
+        <ThemeToggle />
+        
+          <>
+            <Link href="/dashboard" className="btn btn-sm btn-ghost">
+              Dashboard
+            </Link>
+            <Link href="/money" className="btn btn-sm btn-ghost">
+              Money
+            </Link>
+            <LoginButton variant="ghost" />
+          </>
+        
+      </div> 
+
+
+
     </header>
   );
 }
