@@ -22,7 +22,7 @@ export default function Navbar() {
             height={36}
             className="logo-img rounded-full object-cover mr-2"
           />
-          <span className="brand-name">Track.me</span>
+          <span className="brand-name">Trackk.me</span>
         </Link>
       </div>
 {/* 
